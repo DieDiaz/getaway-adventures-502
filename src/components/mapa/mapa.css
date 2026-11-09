@@ -1,0 +1,132 @@
+/* =========== Explorador: mapa fijo + tarjetas metalizadas =========== */
+.explorer { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 48px; align-items: start; }
+
+/* ---------- Mapa ---------- */
+.explorer-map {
+  position: sticky; top: 84px; height: calc(100vh - 110px); max-height: 760px;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+}
+.mapa-lienzo { position: relative; width: min(100%, calc((100vh - 150px) * 500 / 540), 640px); aspect-ratio: 500 / 540; }
+.mapa-lienzo svg { width: 100%; height: 100%; overflow: visible; display: block; }
+.mapa-vecino { fill: #ece3d3; stroke: #d8cab2; stroke-width: 1; }
+.mapa-pais { font: 700 15px var(--font-display); letter-spacing: .35em; fill: #9b7f5a; opacity: .55; }
+.mapa-mar { font: italic 500 12px var(--font-body); fill: #8fa3a3; letter-spacing: .08em; }
+
+.mapa-ruta {
+  fill: none; stroke: var(--orange); stroke-width: 2; stroke-dasharray: 5 6; stroke-linecap: round;
+  animation: ruta-dibujar 1.1s ease-out both, ruta-avanzar 18s linear 1.1s infinite;
+}
+@keyframes ruta-dibujar { from { stroke-dashoffset: 400; opacity: 0; } to { stroke-dashoffset: 0; opacity: 1; } }
+@keyframes ruta-avanzar { to { stroke-dashoffset: -220; } }
+
+.mapa-base rect { fill: var(--ink); stroke: #f6f0e4; stroke-width: 2; }
+
+.mapa-pin { cursor: pointer; outline: none; }
+.pin-hit { fill: transparent; }
+.pin-dot { fill: #fffaf2; stroke: #7a5c3c; stroke-width: 2; transition: r .35s cubic-bezier(.3,1.6,.5,1), fill .3s; }
+.mapa-pin.is-hover .pin-dot, .mapa-pin:focus-visible .pin-dot { fill: #f5dcc2; stroke: var(--orange-600); }
+.mapa-pin.is-active .pin-dot { fill: var(--orange); stroke: #fffaf2; stroke-width: 2.5; }
+.pin-glow { animation: glow 2.4s ease-in-out infinite; transform-origin: center; }
+.pin-pulse { fill: none; stroke: var(--orange); stroke-width: 2; animation: pulso 1.8s ease-out infinite; transform-origin: center; transform-box: fill-box; }
+@keyframes pulso { from { transform: scale(1); opacity: .9; } to { transform: scale(3.2); opacity: 0; } }
+@keyframes glow { 50% { opacity: .55; } }
+
+.mapa-tip {
+  position: absolute; transform: translate(-50%, calc(-100% - 22px));
+  background: rgba(47, 39, 33, .92); color: #fbf4e8; padding: 8px 12px; border-radius: 10px;
+  display: flex; flex-direction: column; gap: 1px; pointer-events: none; white-space: nowrap;
+  box-shadow: 0 10px 24px -8px rgba(47, 39, 33, .5); transition: left .45s ease, top .45s ease;
+  font-size: .8rem; z-index: 2;
+}
+.mapa-tip::after { content: ''; position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%); border: 6px solid transparent; border-bottom: 0; border-top-color: rgba(47, 39, 33, .92); }
+.mapa-tip strong { font-family: var(--font-display); font-size: .95rem; }
+.mapa-tip span { color: #d8cfc3; }
+.mapa-tip .mapa-tip-meta { color: #e0b48c; font-weight: 600; }
+.mapa-leyenda { display: flex; align-items: center; gap: 8px; font-size: .78rem; color: var(--muted); margin: 6px 0 0; }
+.ley-base { width: 9px; height: 9px; background: var(--ink); transform: rotate(45deg); display: inline-block; }
+.ley-pin { width: 10px; height: 10px; border-radius: 50%; background: var(--orange); display: inline-block; margin-left: 10px; }
+
+/* ---------- Lista de tarjetas ---------- */
+.explorer-list { display: flex; flex-direction: column; gap: 56px; padding: 22vh 0 32vh; }
+
+.mcard {
+  --metal: linear-gradient(125deg, #cfc6b8 0%, #f3eee5 18%, #bdb3a3 38%, #ece6dc 55%, #a99f8f 78%, #ddd5c8 100%);
+  position: relative; border-radius: 22px; padding: 1.5px;
+  background: var(--metal);
+  box-shadow: 0 18px 40px -22px rgba(47, 39, 33, .55);
+  opacity: .55; transform: scale(.95); filter: saturate(.6);
+  transition: opacity .5s ease, transform .5s cubic-bezier(.2,.8,.2,1), filter .5s ease, box-shadow .5s ease;
+  animation: flotar 7s ease-in-out infinite;
+}
+@keyframes flotar { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
+
+.mcard.is-active {
+  opacity: 1; transform: scale(1.02); filter: none;
+  box-shadow:
+    0 0 0 1px rgba(192, 112, 63, .45),
+    0 0 38px -4px rgba(224, 160, 110, .55),
+    0 30px 60px -24px rgba(90, 50, 25, .55);
+}
+.mcard:hover { opacity: 1; filter: none; }
+
+.mcard-link {
+  position: relative; display: grid; grid-template-columns: 42% 1fr; overflow: hidden;
+  border-radius: 21px; text-decoration: none; color: var(--ink);
+  /* metal cepillado */
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.07) 0 1px, rgba(0,0,0,.025) 1px 3px),
+    linear-gradient(135deg, #e7e0d4 0%, #f7f3ec 30%, #d9d0c1 55%, #efe9df 75%, #cbc1b0 100%);
+}
+.mcard-photo { position: relative; min-height: 220px; background: #8a7b67 center / cover; margin: 10px; border-radius: 14px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.35), 0 6px 14px -6px rgba(0,0,0,.4); }
+.mcard-num {
+  position: absolute; top: 10px; left: 10px; font: 700 .78rem var(--font-display); letter-spacing: .08em;
+  color: #fbf4e8; background: rgba(47, 39, 33, .55); backdrop-filter: blur(4px); padding: 3px 9px; border-radius: 999px;
+}
+.mcard-body { padding: 18px 20px 18px 8px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.mcard-dest { display: inline-flex; align-items: center; gap: 4px; font-size: .74rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #8a6a4a; }
+.mcard h3 { font-size: 1.45rem; margin: 0; text-shadow: 0 1px 0 rgba(255,255,255,.7); }
+.mcard-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .85rem; color: #5a4e42; }
+.mcard-meta span { display: inline-flex; align-items: center; gap: 4px; }
+.mcard-price strong { font-family: var(--font-display); font-size: 1.1rem; color: var(--orange-600); }
+
+/* Resumen al pasar el cursor */
+.mcard-more { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s ease; }
+.mcard-more > div { overflow: hidden; }
+.mcard:hover .mcard-more, .mcard-link:focus-visible .mcard-more { grid-template-rows: 1fr; }
+.mcard-more p { font-size: .86rem; color: #4a4038; margin: 8px 0 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.mcard-more .mcard-horario { font-size: .8rem; color: #7a5c3c; font-weight: 500; -webkit-line-clamp: 2; }
+.mcard-more ul { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 4px; }
+.mcard-more li { font-size: .74rem; background: rgba(255,255,255,.55); border: 1px solid rgba(155,127,90,.35); padding: 2px 8px; border-radius: 999px; }
+.mcard-cta { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-weight: 600; font-size: .88rem; color: var(--orange-600); }
+
+/* Destello metálico */
+.mcard-sheen {
+  position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.55) 48%, rgba(255,255,255,.1) 54%, transparent 62%);
+  background-size: 250% 100%; background-position: 130% 0; mix-blend-mode: soft-light;
+}
+.mcard.is-active .mcard-sheen { animation: brillo-metal 3.2s ease-in-out infinite; }
+.mcard:hover .mcard-sheen { animation: brillo-metal 1.4s ease-out; }
+@keyframes brillo-metal { 0% { background-position: 130% 0; } 60%, 100% { background-position: -30% 0; } }
+
+.mcard-link:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+
+/* ---------- Móvil ---------- */
+@media (max-width: 900px) {
+  .explorer { grid-template-columns: 1fr; gap: 0; }
+  .mapa-lienzo { width: min(100%, calc(34vh * 500 / 540)); }
+  .explorer-map {
+    top: 64px; height: 36vh; z-index: 3; background: linear-gradient(var(--sand) 85%, transparent);
+    margin: 0 -16px; padding: 4px 16px 10px;
+  }
+  .mapa-leyenda { display: none; }
+  .explorer-list { padding: 4vh 0 30vh; gap: 36px; }
+  .mcard-link { grid-template-columns: 1fr; }
+  .mcard-photo { min-height: 170px; }
+  .mcard-body { padding: 4px 16px 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mcard, .mcard.is-active .mcard-sheen, .mapa-ruta, .pin-pulse, .pin-glow { animation: none; }
+  .mcard { transition: none; }
+}
