@@ -10,7 +10,8 @@
     "db:migrate": "node --env-file=.env scripts/migrate.mjs",
     "make-admin": "node --env-file=.env scripts/make-admin.mjs",
     "db:seed": "node --env-file=.env scripts/migrate.mjs seed.sql",
-    "db:admin": "node --env-file=.env scripts/migrate.mjs admin.sql"
+    "db:admin": "node --env-file=.env scripts/migrate.mjs admin.sql",
+    "db:i18n": "node --env-file=.env scripts/migrate.mjs i18n.sql"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.109.0",

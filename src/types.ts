@@ -15,6 +15,14 @@ export interface Tour {
   lng: number | null;
   activo: boolean;
   orden: number;
+  /** Traducciones al inglés (si están vacías se muestra el español) */
+  nombre_en?: string | null;
+  destino_en?: string | null;
+  descripcion_en?: string | null;
+  duracion_en?: string | null;
+  punto_salida_en?: string | null;
+  horario_en?: string | null;
+  incluye_en?: string[];
 }
 
 export interface SalidaDisponible {
@@ -67,6 +75,8 @@ export interface Promocion {
   hasta: string | null;
   activo: boolean;
   created_at: string;
+  titulo_en?: string | null;
+  descripcion_en?: string | null;
 }
 
 export interface Cliente {

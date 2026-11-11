@@ -33,6 +33,13 @@ Variables en `.env` (ver `.env.example`). Solo las que empiezan con `VITE_` lleg
 
 SQL del módulo: `supabase/admin.sql` (`npm run db:admin`).
 
+### Idiomas (inglés / español)
+
+La página pública es bilingüe: se abre en **inglés** por defecto y el selector **EN / ES** del menú cambia el idioma
+(se recuerda en el navegador). Los textos fijos están en `src/lib/i18n.tsx`.
+Los textos de tours y promociones tienen columnas `*_en` (`supabase/i18n.sql`, `npm run db:i18n`);
+se editan en el panel en la sección "English version". Si un campo en inglés está vacío, se muestra el español.
+
 ### Administrador
 
 1. Crea el usuario en Supabase → Authentication → Users (correo + contraseña).

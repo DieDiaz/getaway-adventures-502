@@ -1,5 +1,6 @@
 import type { Tour } from '../types';
 import { asset } from '../lib/supabase';
+import { campo, useLang } from '../lib/i18n';
 
 /** Color de tema (HSL) y degradado de respaldo por tour */
 export const TEMAS: Record<string, { color: string; gradiente: string }> = {
@@ -15,11 +16,12 @@ const DEFAULT = { color: '30 25% 22%', gradiente: 'linear-gradient(160deg,#3f523
 export const temaDe = (slug: string) => TEMAS[slug] ?? DEFAULT;
 
 export default function TourCover({ tour, className = '' }: { tour: Tour; className?: string }) {
+  const { lang } = useLang();
   const gradiente = temaDe(tour.slug).gradiente;
   const style = { backgroundImage: tour.imagen_url ? `url(${asset(tour.imagen_url)}), ${gradiente}` : gradiente };
 
   return (
-    <div className={`cover ${className}`} style={style} role="img" aria-label={tour.nombre}>
+    <div className={`cover ${className}`} style={style} role="img" aria-label={campo(tour, 'nombre', lang)}>
       {!tour.imagen_url && <span className="cover-mountains" aria-hidden />}
     </div>
   );

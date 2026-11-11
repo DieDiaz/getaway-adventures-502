@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Clock, LocateFixed, MapPin, Maximize2, Minus, Plus } from 'lucide-react';
 import { asset, formatQ } from '../../lib/supabase';
 import type { Tour } from '../../types';
+import { campo, useLang } from '../../lib/i18n';
 import { GUATEMALA, MAPA_H, MAPA_W, VECINOS, proyectar } from './guatemala';
 import './mapa.css';
 
@@ -44,7 +45,18 @@ function separar(puntos: ([number, number] | null)[], radio: number) {
   return pos;
 }
 
-export default function MapaTours({ tours }: Props) {
+export default function MapaTours({ tours: originales }: Props) {
+  const { t, lang } = useLang();
+  // Tours con los textos en el idioma elegido
+  const tours = useMemo(() => originales.map((x) => ({
+    ...x,
+    nombre: campo(x, 'nombre', lang),
+    destino: campo(x, 'destino', lang),
+    descripcion: campo(x, 'descripcion', lang),
+    duracion: campo(x, 'duracion', lang),
+    horario: campo(x, 'horario', lang),
+    incluye: campo(x, 'incluye', lang),
+  })), [originales, lang]);
   const [activo, setActivo] = useState(0);
   const [hoverPin, setHoverPin] = useState<number | null>(null);
   const [manual, setManual] = useState(false);
@@ -69,7 +81,7 @@ export default function MapaTours({ tours }: Props) {
     );
     refs.current.forEach((el) => el && obs.observe(el));
     return () => obs.disconnect();
-  }, [tours]);
+  }, [originales]);
 
   const irA = (i: number) => refs.current[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
@@ -116,7 +128,7 @@ export default function MapaTours({ tours }: Props) {
     const lejos = Math.hypot(p[0] - bx, p[1] - by) > 60;
     mover({ cx: lejos ? (p[0] + bx) / 2 : p[0], cy: lejos ? (p[1] + by) / 2 : p[1], z: lejos ? Math.min(z, 1.5) : z });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activo, manual, tours]);
+  }, [activo, manual, originales]);
 
   const zoom = (factor: number) => {
     setManual(true);
@@ -193,7 +205,7 @@ export default function MapaTours({ tours }: Props) {
           ref={svgRef}
           viewBox={`${vx} ${vy} ${vw} ${vh}`}
           role="img"
-          aria-label={`Mapa de Guatemala. Destino resaltado: ${actual?.nombre ?? ''}`}
+          aria-label={t('map.aria', { name: actual?.nombre ?? '' })}
           className={cam.z > 1.01 ? 'is-zoomed' : ''}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -238,8 +250,8 @@ export default function MapaTours({ tours }: Props) {
           <path d={GUATEMALA} fill="url(#curvas)" pointerEvents="none" />
           {cam.z < 1.6 && (
             <>
-              <text x={MAPA_W / 2 + 40} y={130} className="mapa-pais">GUATEMALA</text>
-              <text x={60} y={MAPA_H - 30} className="mapa-mar">Océano Pacífico</text>
+              <text x={MAPA_W / 2 + 40} y={130} className="mapa-pais">{t('map.country')}</text>
+              <text x={60} y={MAPA_H - 30} className="mapa-mar">{t('map.ocean')}</text>
             </>
           )}
 
@@ -256,7 +268,7 @@ export default function MapaTours({ tours }: Props) {
           {/* Agencia */}
           <g className="mapa-base" transform={`translate(${bx},${by}) scale(${inv})`}>
             <rect x="-5" y="-5" width="10" height="10" transform="rotate(45)" />
-            {conNombres && !puntos.some((q) => q && Math.hypot(q[0] - bx, q[1] - by) * cam.z < 18) && <text x="10" y="4" className="pin-nombre base">Antigua (agencia)</text>}
+            {conNombres && !puntos.some((q) => q && Math.hypot(q[0] - bx, q[1] - by) * cam.z < 18) && <text x="10" y="4" className="pin-nombre base">{t('map.agency')}</text>}
           </g>
 
           {/* Destinos */}
@@ -297,26 +309,26 @@ export default function MapaTours({ tours }: Props) {
           </div>
         )}
 
-        <div className="mapa-zoom" role="group" aria-label="Zoom del mapa">
-          <button type="button" onClick={() => zoom(1.6)} aria-label="Acercar" title="Acercar"><Plus size={16} /></button>
-          <button type="button" onClick={() => zoom(1 / 1.6)} aria-label="Alejar" title="Alejar" disabled={cam.z <= 1.01}><Minus size={16} /></button>
-          <button type="button" onClick={verTodo} aria-label="Ver todo el país" title="Ver todo el país"><Maximize2 size={15} /></button>
-          <button type="button" onClick={seguir} className={manual ? '' : 'on'} aria-pressed={!manual} aria-label="Seguir el recorrido" title="Seguir el recorrido automáticamente">
+        <div className="mapa-zoom" role="group" aria-label={t('map.zoomGroup')}>
+          <button type="button" onClick={() => zoom(1.6)} aria-label={t('map.zoomIn')} title={t('map.zoomIn')}><Plus size={16} /></button>
+          <button type="button" onClick={() => zoom(1 / 1.6)} aria-label={t('map.zoomOut')} title={t('map.zoomOut')} disabled={cam.z <= 1.01}><Minus size={16} /></button>
+          <button type="button" onClick={verTodo} aria-label={t('map.fit')} title={t('map.fit')}><Maximize2 size={15} /></button>
+          <button type="button" onClick={seguir} className={manual ? '' : 'on'} aria-pressed={!manual} aria-label={t('map.follow')} title={t('map.follow')}>
             <LocateFixed size={15} />
           </button>
         </div>
         </div>
 
         <p className="mapa-leyenda">
-          <span className="ley-base" /> Salidas desde Antigua <span className="ley-pin" /> Destino
-          <span className="ley-tip">· Arrastra o usa + / − para explorar</span>
+          <span className="ley-base" /> {t('map.legendBase')} <span className="ley-pin" /> {t('map.legendPin')}
+          <span className="ley-tip">{t('map.legendTip')}</span>
         </p>
       </div>
 
       <div className="explorer-list">
-        {tours.map((t, i) => (
+        {tours.map((x, i) => (
           <article
-            key={t.id}
+            key={x.id}
             ref={(el) => { refs.current[i] = el; }}
             data-i={i}
             className={`mcard ${i === activo ? 'is-active' : ''}`}
@@ -324,25 +336,25 @@ export default function MapaTours({ tours }: Props) {
             onMouseEnter={() => setHoverPin(i)}
             onMouseLeave={() => setHoverPin(null)}
           >
-            <Link to={`/tour/${t.slug}`} className="mcard-link" aria-label={`${t.nombre}: ver detalles y reservar`}>
-              <div className="mcard-photo" style={{ backgroundImage: t.imagen_url ? `url(${asset(t.imagen_url)})` : undefined }}>
+            <Link to={`/tour/${x.slug}`} className="mcard-link" aria-label={t('map.cardAria', { name: x.nombre })}>
+              <div className="mcard-photo" style={{ backgroundImage: x.imagen_url ? `url(${asset(x.imagen_url)})` : undefined }}>
                 <span className="mcard-num">{String(i + 1).padStart(2, '0')}</span>
               </div>
               <div className="mcard-body">
-                <span className="mcard-dest"><MapPin size={13} /> {t.destino}</span>
-                <h3>{t.nombre}</h3>
+                <span className="mcard-dest"><MapPin size={13} /> {x.destino}</span>
+                <h3>{x.nombre}</h3>
                 <div className="mcard-meta">
-                  <span><Clock size={13} /> {t.duracion}</span>
-                  <span className="mcard-price">Desde <strong>{formatQ(Number(t.precio_q))}</strong></span>
+                  <span><Clock size={13} /> {x.duracion}</span>
+                  <span className="mcard-price">{t('map.from')} <strong>{formatQ(Number(x.precio_q))}</strong></span>
                 </div>
                 <div className="mcard-more">
                   <div>
-                    <p>{t.descripcion}</p>
-                    {t.horario && <p className="mcard-horario">{t.horario}</p>}
-                    {t.incluye.length > 0 && (
-                      <ul>{t.incluye.slice(0, 4).map((x) => <li key={x}>{x}</li>)}</ul>
+                    <p>{x.descripcion}</p>
+                    {x.horario && <p className="mcard-horario">{x.horario}</p>}
+                    {x.incluye.length > 0 && (
+                      <ul>{x.incluye.slice(0, 4).map((x) => <li key={x}>{x}</li>)}</ul>
                     )}
-                    <span className="mcard-cta">Ver y reservar <ArrowRight size={15} /></span>
+                    <span className="mcard-cta">{t('map.cta')} <ArrowRight size={15} /></span>
                   </div>
                 </div>
               </div>

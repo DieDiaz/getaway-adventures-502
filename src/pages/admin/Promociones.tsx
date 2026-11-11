@@ -7,7 +7,7 @@ import type { Promocion } from '../../types';
 import type { AdminProps } from './AdminApp';
 
 type Borrador = Omit<Promocion, 'id' | 'created_at'> & { id?: string };
-const NUEVA: Borrador = { titulo: '', descripcion: '', imagen_url: null, codigo: '', descuento_pct: 10, tour_id: null, desde: null, hasta: null, activo: true };
+const NUEVA: Borrador = { titulo: '', descripcion: '', titulo_en: '', descripcion_en: '', imagen_url: null, codigo: '', descuento_pct: 10, tour_id: null, desde: null, hasta: null, activo: true };
 
 export function estadoPromo(p: Promocion) {
   const hoy = new Date().toISOString().slice(0, 10);
@@ -103,6 +103,7 @@ function EditorPromo({ inicial, tours, onCerrar, recargar }: {
     setGuardando(true); setError(null);
     const fila = {
       titulo: p.titulo.trim(), descripcion: p.descripcion.trim(), imagen_url: p.imagen_url,
+      titulo_en: p.titulo_en?.trim() || null, descripcion_en: p.descripcion_en?.trim() || null,
       codigo: p.codigo?.trim() ? p.codigo.trim().toUpperCase() : null, descuento_pct: Number(p.descuento_pct),
       tour_id: p.tour_id || null, desde: p.desde || null, hasta: p.hasta || null, activo: p.activo,
     };
@@ -131,6 +132,8 @@ function EditorPromo({ inicial, tours, onCerrar, recargar }: {
         <div className="editor-grid">
           <label className="span-2">Título<input required maxLength={120} value={p.titulo} onChange={(e) => set('titulo', e.target.value)} placeholder="Black Friday en Acatenango" /></label>
           <label className="span-2">Descripción<textarea rows={3} value={p.descripcion} onChange={(e) => set('descripcion', e.target.value)} placeholder="Reserva este mes y obtén 15% de descuento…" /></label>
+          <label className="span-2">Title (English) <small className="muted">(vacío = se usa el español)</small><input maxLength={120} value={p.titulo_en ?? ''} onChange={(e) => set('titulo_en', e.target.value)} placeholder="Black Friday on Acatenango" /></label>
+          <label className="span-2">Description (English)<textarea rows={3} value={p.descripcion_en ?? ''} onChange={(e) => set('descripcion_en', e.target.value)} placeholder="Book this month and get 15% off…" /></label>
           <label>Código de descuento <small className="muted">(opcional)</small>
             <input value={p.codigo ?? ''} onChange={(e) => set('codigo', e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''))} placeholder="ACATE15" maxLength={30} />
           </label>

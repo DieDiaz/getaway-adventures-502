@@ -12,6 +12,7 @@ type Borrador = Omit<Tour, 'id'> & { id?: string };
 const NUEVO: Borrador = {
   slug: '', nombre: '', destino: '', descripcion: '', imagen_url: null, precio_q: 0, duracion: '1 día',
   incluye: [], punto_salida: 'Antigua Guatemala', horario: '', galeria: [], lat: null, lng: null, activo: true, orden: 99,
+  nombre_en: '', destino_en: '', descripcion_en: '', duracion_en: '', punto_salida_en: '', horario_en: '', incluye_en: [],
 };
 
 export default function Tours({ data, recargar }: AdminProps) {
@@ -101,6 +102,7 @@ function EditorTour({ inicial, salidas, reservas, onCerrar, recargar }: {
 }) {
   const [t, setT] = useState<Borrador>({ ...inicial, horario: inicial.horario ?? '' });
   const [incluyeTxt, setIncluyeTxt] = useState(inicial.incluye.join('\n'));
+  const [incluyeEnTxt, setIncluyeEnTxt] = useState((inicial.incluye_en ?? []).join('\n'));
   const [slugManual, setSlugManual] = useState(!!inicial.id);
   const [guardando, setGuardando] = useState(false);
   const [subiendo, setSubiendo] = useState(false);
@@ -132,6 +134,9 @@ function EditorTour({ inicial, salidas, reservas, onCerrar, recargar }: {
       incluye: incluyeTxt.split('\n').map((x) => x.trim()).filter(Boolean), punto_salida: t.punto_salida.trim(),
       galeria: t.galeria, activo: t.activo, orden: Number(t.orden),
       lat: t.lat === null || String(t.lat) === '' ? null : Number(t.lat), lng: t.lng === null || String(t.lng) === '' ? null : Number(t.lng),
+      nombre_en: t.nombre_en?.trim() || null, destino_en: t.destino_en?.trim() || null, descripcion_en: t.descripcion_en?.trim() || null,
+      duracion_en: t.duracion_en?.trim() || null, punto_salida_en: t.punto_salida_en?.trim() || null, horario_en: t.horario_en?.trim() || null,
+      incluye_en: incluyeEnTxt.split('\n').map((x) => x.trim()).filter(Boolean),
     };
     const res = t.id
       ? await supabase.from('ga_tours').update(fila).eq('id', t.id).select().single()
@@ -184,6 +189,18 @@ function EditorTour({ inicial, salidas, reservas, onCerrar, recargar }: {
             <label>Orden en la página<input type="number" value={t.orden} onChange={(e) => set('orden', Number(e.target.value))} /></label>
             <label className="check"><input type="checkbox" checked={t.activo} onChange={(e) => set('activo', e.target.checked)} /> Visible en la página (activo)</label>
           </div>
+        </div>
+
+        <h3>English version</h3>
+        <p className="muted">La página se muestra en inglés por defecto. Los campos vacíos usan el texto en español.</p>
+        <div className="editor-grid">
+          <label>Name (EN)<input value={t.nombre_en ?? ''} onChange={(e) => set('nombre_en', e.target.value)} placeholder={t.nombre} /></label>
+          <label>Destination (EN)<input value={t.destino_en ?? ''} onChange={(e) => set('destino_en', e.target.value)} placeholder={t.destino} /></label>
+          <label>Duration (EN)<input value={t.duracion_en ?? ''} onChange={(e) => set('duracion_en', e.target.value)} placeholder="2 days / 1 night" /></label>
+          <label>Departure point (EN)<input value={t.punto_salida_en ?? ''} onChange={(e) => set('punto_salida_en', e.target.value)} placeholder={t.punto_salida} /></label>
+          <label className="span-2">Schedule (EN)<input value={t.horario_en ?? ''} onChange={(e) => set('horario_en', e.target.value)} placeholder="Departs 8:00 am from Antigua · returns 5:00 pm" /></label>
+          <label className="span-2">Description (EN)<textarea rows={3} value={t.descripcion_en ?? ''} onChange={(e) => set('descripcion_en', e.target.value)} /></label>
+          <label className="span-2">What's included (EN) <small className="muted">(uno por línea)</small><textarea rows={5} value={incluyeEnTxt} onChange={(e) => setIncluyeEnTxt(e.target.value)} /></label>
         </div>
 
         <h3>Fotos</h3>

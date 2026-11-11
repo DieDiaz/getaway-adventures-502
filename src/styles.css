@@ -59,7 +59,13 @@ img { max-width: 100%; }
 .nav-links { display: flex; gap: 20px; align-items: center; font-weight: 500; font-size: .95rem; }
 .nav-links a:not(.btn) { text-decoration: none; }
 .nav-links a:not(.btn):hover { color: var(--orange-600); }
+.lang-switch { display: inline-flex; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); }
+.lang-switch button { border: 0; background: none; font: inherit; font-size: .8rem; font-weight: 600; letter-spacing: .04em; color: var(--muted); padding: 4px 10px; border-radius: 999px; cursor: pointer; }
+.lang-switch button:hover { color: var(--ink); }
+.lang-switch button[aria-pressed="true"] { background: var(--green-800); color: #fff; }
+.lang-switch button:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
 @media (max-width: 640px) {
+  .nav-links { gap: 10px; }
   .nav-links a:not(.btn) { display: none; }
   .brand span { font-size: .95rem; }
 }

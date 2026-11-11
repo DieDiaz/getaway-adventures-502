@@ -15,8 +15,11 @@ export const INSTAGRAM_DM = 'https://ig.me/m/getaway.adventures502';
 const money = new Intl.NumberFormat('es-GT', { style: 'currency', currency: 'GTQ' });
 export const formatQ = (n: number) => money.format(n);
 
-export const formatFecha = (iso: string, opts: Intl.DateTimeFormatOptions = { weekday: 'short', day: 'numeric', month: 'short' }) =>
-  new Date(`${iso}T12:00:00`).toLocaleDateString('es-GT', opts);
+export const formatFecha = (
+  iso: string,
+  opts: Intl.DateTimeFormatOptions = { weekday: 'short', day: 'numeric', month: 'short' },
+  locale = 'es-GT',
+) => new Date(`${iso}T12:00:00`).toLocaleDateString(locale, opts);
 
 export const WHATSAPP = '50256333618';
 export const whatsappLink = (texto: string) => `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(texto)}`;

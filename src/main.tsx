@@ -5,19 +5,22 @@ import Layout from './components/Layout';
 import Home from './pages/Home';
 import TourPage from './pages/TourPage';
 import AdminApp from './pages/admin/AdminApp';
+import { LangProvider } from './lib/i18n';
 import './styles.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="tour/:slug" element={<TourPage />} />
-          <Route path="admin/:tab?" element={<AdminApp />} />
-          <Route path="*" element={<Home />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <LangProvider>
+      <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="tour/:slug" element={<TourPage />} />
+            <Route path="admin/:tab?" element={<AdminApp />} />
+            <Route path="*" element={<Home />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </LangProvider>
   </StrictMode>,
 );
